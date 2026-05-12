@@ -1,0 +1,215 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Light theme */
+
+  --bg: 250 247 240;
+
+  --surface: 255 253 248;
+
+  --surface-2: 244 240 230;
+
+  --border: 226 220 205;
+
+  --fg: 23 23 23;
+
+  --muted: 110 105 95;
+
+  --accent: 217 119 38;
+
+  --accent-2: 18 70 67;
+}
+
+.dark {
+  /* Dark theme */
+
+  --bg: 14 14 17;
+
+  --surface: 22 22 28;
+
+  --surface-2: 30 30 38;
+
+  --border: 50 50 60;
+
+  --fg: 240 238 232;
+
+  --muted: 150 148 140;
+
+  --accent: 255 209 102;
+
+  --accent-2: 110 200 190;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+
+  font-family:
+    "Geist",
+    "Inter",
+    system-ui,
+    sans-serif;
+
+  background: rgb(var(--bg));
+
+  color: rgb(var(--fg));
+
+  -webkit-font-smoothing: antialiased;
+
+  -moz-osx-font-smoothing: grayscale;
+
+  font-feature-settings:
+    "ss01",
+    "cv11";
+}
+
+::selection {
+  background:
+    rgb(var(--accent) / 0.3);
+
+  color: rgb(var(--fg));
+}
+
+/* Scrollbar */
+
+::-webkit-scrollbar {
+  width: 10px;
+
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background:
+    rgb(var(--border));
+
+  border-radius: 999px;
+
+  border: 2px solid transparent;
+
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background:
+    rgb(var(--muted));
+
+  border: 2px solid transparent;
+
+  background-clip: padding-box;
+}
+
+/* Grain */
+
+.grain::before {
+  content: "";
+
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 100;
+
+  pointer-events: none;
+
+  opacity: 0.035;
+
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* Components */
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-fg px-4 py-2 text-sm font-medium text-bg transition-colors duration-150 hover:bg-fg/90 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-fg transition-colors duration-150 hover:bg-surface2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-fg transition-colors duration-150 hover:bg-surface2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .card {
+    @apply rounded-2xl border border-border bg-surface;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-2.5 py-1 text-xs text-muted;
+  }
+}
+
+/* Markdown */
+
+.prose-thinksy {
+  @apply leading-relaxed text-fg;
+}
+
+.prose-thinksy p {
+  @apply my-3;
+}
+
+.prose-thinksy h1 {
+  @apply mt-6 mb-3 text-2xl font-semibold;
+}
+
+.prose-thinksy h2 {
+  @apply mt-5 mb-2 text-xl font-semibold;
+}
+
+.prose-thinksy h3 {
+  @apply mt-4 mb-2 text-lg font-semibold;
+}
+
+.prose-thinksy ul {
+  @apply my-3 list-disc space-y-1 pl-6;
+}
+
+.prose-thinksy ol {
+  @apply my-3 list-decimal space-y-1 pl-6;
+}
+
+.prose-thinksy a {
+  @apply text-accent2 underline underline-offset-2 hover:text-accent;
+}
+
+.prose-thinksy blockquote {
+  @apply my-3 border-l-2 border-accent pl-4 italic text-muted;
+}
+
+.prose-thinksy code:not(pre code) {
+  @apply rounded bg-surface2 px-1.5 py-0.5 font-mono text-[0.85em];
+}
+
+.prose-thinksy pre {
+  @apply my-3 overflow-x-auto rounded-xl text-sm;
+}
+
+.prose-thinksy table {
+  @apply my-3 w-full border-collapse text-sm;
+}
+
+.prose-thinksy th,
+.prose-thinksy td {
+  @apply border border-border px-3 py-1.5 text-left;
+}
+
+.prose-thinksy hr {
+  @apply my-5 border-border;
+}

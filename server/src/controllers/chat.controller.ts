@@ -18,7 +18,10 @@ export const chatController = {
     }
 
     const result = await chatService.queryKnowledgeBase(parsed.data);
-    res.status(200).json(ApiResponse.success(result));
+    res.status(200).json({
+      answer: result.answer,
+      sources: result.matches,
+    });
   },
   debugVectors: async (_req: Request, res: Response): Promise<void> => {
     const result = await chatService.debugVectors();
