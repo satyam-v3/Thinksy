@@ -7,11 +7,28 @@ export interface ChatQueryInput {
 }
 
 export const chatService = {
-  async queryKnowledgeBase(input: ChatQueryInput) {
-    return retrieveRelevantChunks({
-      question: input.question,
-      topK: input.topK,
-    });
+  async queryKnowledgeBase(
+    input: ChatQueryInput,
+  ) {
+    const retrieval =
+      await retrieveRelevantChunks({
+        question: input.question,
+        topK: input.topK,
+      });
+
+    const { generateAnswer } =
+      await import('../lib/ai/generateAnswer');
+
+    const answer =
+      await generateAnswer(
+        input.question,
+        retrieval.matches,
+      );
+
+    return {
+      answer,
+      sources: retrieval.matches,
+    };
   },
 
   async debugVectors() {

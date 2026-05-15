@@ -1,86 +1,154 @@
 // src/lib/ai/chunker.ts
-// Splits cleaned text into overlapping chunks.
-// Respects sentence / paragraph boundaries so
-// every chunk stays semantically self-contained.
 
-import type { ChunkOptions, ChunkMetadata, TextChunk } from '../../types/pdf.types';
+import type {
+    ChunkOptions,
+    ChunkMetadata,
+    TextChunk,
+} from '../../types/pdf.types';
 
-const DEFAULT_CHUNK_SIZE = 1000; // characters
-const DEFAULT_OVERLAP = 150;  // characters
+const DEFAULT_CHUNK_SIZE = 1000;
+const DEFAULT_OVERLAP = 150;
 
-// ── page-marker helpers ───────────────────────
+// ─────────────────────────────────────────────
+// Page marker helpers
+// ─────────────────────────────────────────────
 
-/**
- * Some PDF parsers embed `[page: N]` markers in the extracted text.
- * Scan for them so we can surface page info in chunk metadata.
- */
-function extractPageMarkers(text: string): Array<{ page: number; startIndex: number }> {
-    const markers: Array<{ page: number; startIndex: number }> = [];
-    const re = /\[page[:\s]*(\d+)\]/gi;
-    let m: RegExpExecArray | null;
-    while ((m = re.exec(text)) !== null) {
-        markers.push({ page: parseInt(m[1], 10), startIndex: m.index });
+function extractPageMarkers(
+    text: string,
+): Array<{
+    page: number;
+    startIndex: number;
+}> {
+    const markers: Array<{
+        page: number;
+        startIndex: number;
+    }> = [];
+
+    const regex =
+        /\[page[:\s]*(\d+)\]/gi;
+
+    let match: RegExpExecArray | null;
+
+    while (
+        (match = regex.exec(text)) !==
+        null
+    ) {
+        markers.push({
+            page: parseInt(match[1], 10),
+            startIndex: match.index,
+        });
     }
+
     return markers;
 }
 
 function resolvePageInfo(
     offset: number,
-    markers: Array<{ page: number; startIndex: number }>,
+    markers: Array<{
+        page: number;
+        startIndex: number;
+    }>,
 ): string | null {
-    if (markers.length === 0) return null;
-    let page = markers[0].page;
-    for (const marker of markers) {
-        if (marker.startIndex <= offset) page = marker.page;
-        else break;
+    if (markers.length === 0) {
+        return null;
     }
-    return `page ${page}`;
+
+    let currentPage =
+        markers[0].page;
+
+    for (const marker of markers) {
+        if (
+            marker.startIndex <= offset
+        ) {
+            currentPage = marker.page;
+        } else {
+            break;
+        }
+    }
+
+    return `page ${currentPage}`;
 }
 
-// ── split-point logic ─────────────────────────
+// ─────────────────────────────────────────────
+// Split point logic
+// ─────────────────────────────────────────────
 
-/**
- * Find the best character index to split at, searching backwards from
- * `maxEnd`.  Priority: paragraph break → sentence end → whitespace.
- * Falls back to `maxEnd` if nothing suitable is found.
- */
-function findSplitPoint(text: string, from: number, maxEnd: number): number {
-    const sub = text.slice(from, maxEnd);
+function findSplitPoint(
+    text: string,
+    from: number,
+    maxEnd: number,
+): number {
+    const sub =
+        text.slice(from, maxEnd);
 
-    // Paragraph break (two newlines)
-    const paraBreak = sub.lastIndexOf('\n\n');
-    if (paraBreak > 0) return from + paraBreak + 2;
+    // Prefer paragraph breaks
+    const paragraphBreak =
+        sub.lastIndexOf('\n\n');
 
-    // Sentence-ending punctuation followed by a capital (avoids "Dr. Smith")
-    const sentEnd = sub.search(/[.!?]\s[A-Z]/);
-    if (sentEnd !== -1) return from + sentEnd + 2;
+    if (paragraphBreak > 0) {
+        return (
+            from +
+            paragraphBreak +
+            2
+        );
+    }
 
-    // Any whitespace
-    const lastSpace = sub.lastIndexOf(' ');
-    if (lastSpace > 0) return from + lastSpace + 1;
+    // Prefer sentence endings
+    const sentenceMatches = [
+        ...sub.matchAll(
+            /[.!?]\s+[A-Z]/g,
+        ),
+    ];
 
+    if (sentenceMatches.length > 0) {
+        const lastMatch =
+            sentenceMatches[
+            sentenceMatches.length - 1
+            ];
+
+        if (
+            lastMatch.index !== undefined
+        ) {
+            return (
+                from +
+                lastMatch.index +
+                2
+            );
+        }
+    }
+
+    // Fallback to whitespace
+    const lastSpace =
+        sub.lastIndexOf(' ');
+
+    if (lastSpace > 0) {
+        return from + lastSpace;
+    }
+
+    // Hard split fallback
     return maxEnd;
 }
 
-// ── public API ────────────────────────────────
+// ─────────────────────────────────────────────
+// Main chunker
+// ─────────────────────────────────────────────
 
-/**
- * Split a cleaned text string into overlapping `TextChunk` objects.
- *
- * @param text     Pre-cleaned text (run prepareText first, or set raw=true).
- * @param source   Original filename — stored in each chunk's metadata.
- * @param options  chunkSize / overlap overrides.
- * @param raw      Pass true to run prepareText() inside this function.
- */
 export function chunkText(
     text: string,
     source: string,
     options: ChunkOptions = {},
 ): TextChunk[] {
-    if (!text.trim()) return [];
+    if (!text.trim()) {
+        return [];
+    }
 
-    const chunkSize = options.chunkSize ?? DEFAULT_CHUNK_SIZE;
-    const overlap = options.overlap ?? DEFAULT_OVERLAP;
+    const chunkSize =
+        options.chunkSize ??
+        DEFAULT_CHUNK_SIZE;
+
+    const overlap =
+        options.overlap ??
+        DEFAULT_OVERLAP;
 
     if (overlap >= chunkSize) {
         throw new Error(
@@ -88,34 +156,73 @@ export function chunkText(
         );
     }
 
-    const pageMarkers = extractPageMarkers(text);
-    const createdAt = new Date().toISOString();
-    const chunks: TextChunk[] = [];
+    const pageMarkers =
+        extractPageMarkers(text);
+
+    const createdAt =
+        new Date().toISOString();
+
+    const chunks: TextChunk[] =
+        [];
 
     let cursor = 0;
-    let index = 0;
+    let chunkIndex = 0;
 
     while (cursor < text.length) {
-        const end = Math.min(cursor + chunkSize, text.length);
-        const splitAt = end < text.length ? findSplitPoint(text, cursor, end) : end;
+        const maxEnd = Math.min(
+            cursor + chunkSize,
+            text.length,
+        );
 
-        const slice = text.slice(cursor, splitAt).trim();
+        const splitAt =
+            maxEnd < text.length
+                ? findSplitPoint(
+                    text,
+                    cursor,
+                    maxEnd,
+                )
+                : maxEnd;
+
+        const slice = text
+            .slice(cursor, splitAt)
+            .trim();
 
         if (slice.length > 0) {
-            const metadata: ChunkMetadata = {
-                chunkId: `${source}-chunk-${index}`,
+            const metadata: ChunkMetadata =
+            {
+                chunkId: `${source}-chunk-${chunkIndex}`,
                 source,
-                chunkIndex: index,
-                pageInfo: resolvePageInfo(cursor, pageMarkers),
+                chunkIndex,
+                pageInfo:
+                    resolvePageInfo(
+                        cursor,
+                        pageMarkers,
+                    ),
                 createdAt,
             };
-            chunks.push({ text: slice, metadata });
-            index++;
+
+            chunks.push({
+                text: slice,
+                metadata,
+            });
+
+            chunkIndex++;
         }
 
-        // Step cursor forward, backing off by overlap to preserve context
-        cursor = splitAt - overlap;
-        if (cursor <= 0 || splitAt >= text.length) break;
+        // Stop safely
+        if (splitAt >= text.length) {
+            break;
+        }
+
+        // Advance cursor correctly
+        const nextCursor =
+            splitAt - overlap;
+
+        if (nextCursor <= cursor) {
+            cursor = splitAt;
+        } else {
+            cursor = nextCursor;
+        }
     }
 
     return chunks;
