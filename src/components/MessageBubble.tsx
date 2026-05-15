@@ -230,22 +230,34 @@ export function MessageBubble({
                     message.sources &&
                     message.sources.length >
                     0 && (
-                        <div
-                            data-testid="sources-list"
-                            className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2"
-                        >
-                            {message.sources.map(
-                                (s, i) => (
-                                    <SourceCard
-                                        key={
-                                            (s.chunkId as string) ||
-                                            `${i}-${s.source || "src"}`
-                                        }
-                                        source={s}
-                                        index={i}
-                                    />
-                                )
-                            )}
+                        <div className="w-full space-y-3">
+                            <div className="flex items-center gap-2 px-1">
+                                <div className="h-px flex-1 bg-border" />
+
+                                <span className="text-[11px] font-medium uppercase tracking-wider text-muted">
+                                    Retrieved Sources
+                                </span>
+
+                                <div className="h-px flex-1 bg-border" />
+                            </div>
+
+                            <div
+                                data-testid="sources-list"
+                                className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2"
+                            >
+                                {message.sources.map(
+                                    (s, i) => (
+                                        <SourceCard
+                                            key={
+                                                (s.chunkId as string) ||
+                                                `${i}-${s.source || "src"}`
+                                            }
+                                            source={s}
+                                            index={i}
+                                        />
+                                    )
+                                )}
+                            </div>
                         </div>
                     )}
 

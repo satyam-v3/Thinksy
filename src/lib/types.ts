@@ -5,10 +5,9 @@ export type Role = "user" | "assistant";
  */
 
 export interface Source {
+    text?: string;
+
     source?: string;
-    chunkId?: string;
-    content?: string;
-    score?: number;
 
     pageInfo?:
     | string
@@ -17,6 +16,19 @@ export interface Source {
         page?: number;
         [key: string]: unknown;
     };
+
+    similarity?: number | null;
+
+    distance?: number | null;
+
+    chunkIndex?: number | null;
+
+    chunkId?: string;
+
+    metadata?: Record<
+        string,
+        unknown
+    >;
 
     [key: string]: unknown;
 }

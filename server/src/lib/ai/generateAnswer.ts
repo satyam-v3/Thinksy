@@ -29,7 +29,13 @@ ${m.text}
 
 export async function generateAnswer(
   question: string,
+
   matches: RetrievalMatch[],
+
+  history: {
+    role: 'user' | 'assistant';
+    content: string;
+  }[] = [],
 ): Promise<string> {
   const context =
     buildContext(matches.slice(0, 3));
@@ -44,30 +50,35 @@ export async function generateAnswer(
           role: 'system',
 
           content: `
-You are Thinksy,
-an AI learning assistant.
-
-Answer ONLY using
-the provided context.
-
-If the answer is not found,
-say you could not find it
-in the uploaded documents.
-`,
+        You are Thinksy,
+        an AI learning assistant.
+        
+        Use conversation history
+        when relevant.
+        
+        Answer ONLY using
+        the provided context.
+        
+        If the answer is not found,
+        say you could not find it
+        in the uploaded documents.
+        `,
         },
+
+        ...history,
 
         {
           role: 'user',
 
           content: `
-CONTEXT:
-
-${context}
-
-QUESTION:
-
-${question}
-`,
+        CONTEXT:
+        
+        ${context}
+        
+        QUESTION:
+        
+        ${question}
+        `,
         },
       ],
     });

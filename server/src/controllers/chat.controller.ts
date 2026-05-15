@@ -6,8 +6,27 @@ import { ApiResponse } from '../utils/ApiResponse';
 import { ApiError } from '../utils/ApiError';
 
 const chatQuerySchema = z.object({
-  question: z.string().trim().min(1, 'Question is required'),
-  topK: z.coerce.number().int().min(1).max(20).optional(),
+  question: z.string().trim().min(1),
+
+  topK: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(20)
+    .optional(),
+
+  history: z
+    .array(
+      z.object({
+        role: z.enum([
+          'user',
+          'assistant',
+        ]),
+
+        content: z.string(),
+      }),
+    )
+    .optional(),
 });
 
 export const chatController = {

@@ -22,8 +22,12 @@ export function getChromaClient(): ChromaClient {
 
 export async function getOrCreateThinksyCollection(): Promise<Collection> {
   const client = getChromaClient();
+
   return client.getOrCreateCollection({
     name: DEFAULT_COLLECTION_NAME,
+
+    embeddingFunction: undefined,
+
     metadata: {
       'hnsw:space': 'cosine',
     },

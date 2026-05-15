@@ -55,13 +55,18 @@ export function SourceCard({
         `Source ${index + 1}`;
 
     const content =
-        (source.content as string) || "";
+        (source.text as string) ||
+        (source.content as string) ||
+        "";
 
     const page = pageLabel(source.pageInfo);
 
-    const score =
-        typeof source.score === "number"
-            ? source.score.toFixed(2)
+    const similarity =
+        typeof source.similarity ===
+            "number"
+            ? `${Math.round(
+                source.similarity * 100
+            )}%`
             : null;
 
     const chunkId =
@@ -91,6 +96,12 @@ export function SourceCard({
                         <span className="truncate text-sm font-medium text-fg">
                             {truncate(name, 64)}
                         </span>
+
+                        {source.chunkIndex != null && (
+                            <span className="ml-2 text-[10px] text-muted">
+                                chunk {source.chunkIndex}
+                            </span>
+                        )}
                     </div>
 
                     <div className="mt-1 flex flex-wrap items-center gap-1.5">
@@ -101,9 +112,9 @@ export function SourceCard({
                             </span>
                         )}
 
-                        {score && (
+                        {similarity && (
                             <span className="chip">
-                                score {score}
+                                🎯 {similarity} match
                             </span>
                         )}
 

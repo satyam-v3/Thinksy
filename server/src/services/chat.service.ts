@@ -1,9 +1,20 @@
 import { retrieveRelevantChunks } from '../lib/vectorstore/retrieval';
 import { getChromaClient, CHROMA_COLLECTION_NAME, getOrCreateThinksyCollection } from '../lib/vectorstore/chroma';
 
+export interface ChatMessage {
+  role:
+  | 'user'
+  | 'assistant';
+
+  content: string;
+}
+
 export interface ChatQueryInput {
   question: string;
+
   topK?: number;
+
+  history?: ChatMessage[];
 }
 
 export const chatService = {
@@ -23,6 +34,7 @@ export const chatService = {
       await generateAnswer(
         input.question,
         retrieval.matches,
+        input.history ?? [],
       );
 
     return {
