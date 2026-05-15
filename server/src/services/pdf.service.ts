@@ -118,10 +118,11 @@ export const pdfService = {
     // ───────────────────────────────────────────
 
     // Embed only first chunk during development
-    const embeddedChunks = await embedChunks(
-      chunks.slice(0, 2),
-      embedOpts,
-    );
+    const embeddedChunks =
+      await embedChunks(
+        chunks,
+        embedOpts,
+      );
 
     if (embeddedChunks.length > 0) {
       console.log(

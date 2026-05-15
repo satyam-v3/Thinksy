@@ -6,9 +6,18 @@ type RetrievalMetadata = Partial<ChunkMetadata> & Record<string, unknown>;
 
 export interface RetrievalMatch {
   text: string;
-  metadata: RetrievalMetadata;
-  distance: number | null;
+
+  source: string;
+
+  pageInfo: string | null;
+
+  chunkIndex: number | null;
+
   similarity: number | null;
+
+  distance: number | null;
+
+  metadata: RetrievalMetadata;
 }
 
 export interface RetrieveChunksInput {
@@ -50,11 +59,37 @@ export async function retrieveRelevantChunks(
     .map((doc, index) => {
       if (!doc) return null;
       const distance = distances?.[index] ?? null;
+      const metadata =
+        (metadatas?.[index] ??
+          {}) as RetrievalMetadata;
+
       return {
         text: doc,
-        metadata: (metadatas?.[index] ?? {}) as RetrievalMetadata,
+
+        source:
+          typeof metadata.source ===
+            'string'
+            ? metadata.source
+            : 'Unknown',
+
+        pageInfo:
+          typeof metadata.pageInfo ===
+            'string'
+            ? metadata.pageInfo
+            : null,
+
+        chunkIndex:
+          typeof metadata.chunkIndex ===
+            'number'
+            ? metadata.chunkIndex
+            : null,
+
+        metadata,
+
         distance,
-        similarity: distanceToSimilarity(distance),
+
+        similarity:
+          distanceToSimilarity(distance),
       };
     })
     .filter((m): m is RetrievalMatch => m !== null);
