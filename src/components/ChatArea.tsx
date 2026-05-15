@@ -142,16 +142,15 @@ export function ChatArea({
             return;
         }
 
-        el.scrollTo({
-            top: el.scrollHeight,
-            behavior: "smooth",
+        requestAnimationFrame(() => {
+            el.scrollTo({
+                top: el.scrollHeight,
+
+                behavior: "auto",
+            });
         });
-    }, [
-        messages.length,
-        messages[
-            messages.length - 1
-        ]?.content,
-    ]);
+
+    }, [messages.length]);
 
     return (
         <div className="flex h-full min-w-0 flex-1 flex-col bg-bg">

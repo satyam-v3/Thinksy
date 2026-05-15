@@ -49,6 +49,8 @@ export interface ChunkMetadata {
    */
   source: string;
 
+  originalName?: string;
+
   /**
    * Position in chunk array
    */
@@ -104,6 +106,8 @@ export interface ChunkOptions {
    * Source filename
    */
   source?: string;
+
+  originalName?: string;
 }
 
 export interface EmbedOptions {

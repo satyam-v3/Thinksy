@@ -43,6 +43,44 @@ export const chatService = {
     };
   },
 
+  async streamKnowledgeBase(
+    input: ChatQueryInput,
+
+    onToken: (
+      token: string,
+    ) => void,
+  ) {
+    const retrieval =
+      await retrieveRelevantChunks({
+        question: input.question,
+
+        topK: input.topK,
+      });
+
+    const { streamAnswer } =
+      await import(
+        '../lib/ai/generateAnswer'
+      );
+
+    const answer =
+      await streamAnswer(
+        input.question,
+
+        retrieval.matches,
+
+        input.history ?? [],
+
+        onToken,
+      );
+
+    return {
+      answer,
+
+      sources:
+        retrieval.matches,
+    };
+  },
+
   async debugVectors() {
     const collection = await getOrCreateThinksyCollection();
 

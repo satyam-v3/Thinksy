@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import {
     ChevronDown,
+    ExternalLink,
     FileText,
     Hash,
 } from "lucide-react";
@@ -50,6 +51,7 @@ export function SourceCard({
     const [open, setOpen] = useState(false);
 
     const name =
+        (source.originalName as string) ||
         (source.source as string) ||
         (source.filename as string) ||
         `Source ${index + 1}`;
@@ -72,8 +74,15 @@ export function SourceCard({
     const chunkId =
         source.chunkId as string | undefined;
 
+    const pdfUrl =
+        name &&
+            name !== `Source ${index + 1}`
+            ? `http://localhost:4000/uploads/${name}`
+            : null;
+
     return (
         <div
+            id={`source-${index + 1}`}
             data-testid={`source-card-${index}`}
             className="card overflow-hidden transition-colors hover:border-fg/30"
         >
@@ -116,6 +125,21 @@ export function SourceCard({
                             <span className="chip">
                                 🎯 {similarity} match
                             </span>
+                        )}
+
+                        {pdfUrl && (
+                            <a
+                                href={pdfUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                onClick={(e) =>
+                                    e.stopPropagation()
+                                }
+                                className="chip hover:border-fg/30 hover:text-fg"
+                            >
+                                <ExternalLink className="h-3 w-3" />
+                                open pdf
+                            </a>
                         )}
 
                         {chunkId && (

@@ -89,3 +89,95 @@ export async function generateAnswer(
     'No answer generated.'
   );
 }
+
+export async function streamAnswer(
+  question: string,
+
+  matches: RetrievalMatch[],
+
+  history: {
+    role: 'user' | 'assistant';
+    content: string;
+  }[] = [],
+
+  onToken?: (
+    token: string,
+  ) => void,
+): Promise<string> {
+  const context =
+    buildContext(
+      matches.slice(0, 3),
+    );
+
+  const stream =
+    await client.chat.completions.create({
+      model:
+        'openai/gpt-3.5-turbo',
+
+      stream: true,
+
+      messages: [
+        {
+          role: 'system',
+
+          content: `
+You are Thinksy,
+an AI learning assistant.
+
+Use conversation history
+when relevant.
+
+Answer ONLY using
+the provided context.
+
+When using information
+from context,
+cite sources inline
+like [1], [2].
+
+The citation number
+corresponds to the
+source number in CONTEXT.
+
+If the answer is not found,
+say you could not find it
+in the uploaded documents.
+`,
+        },
+
+        ...history,
+
+        {
+          role: 'user',
+
+          content: `
+CONTEXT:
+
+${context}
+
+QUESTION:
+
+${question}
+`,
+        },
+      ],
+    });
+
+  let finalAnswer = '';
+
+  for await (const chunk of stream) {
+    const token =
+      chunk.choices?.[0]
+        ?.delta?.content || '';
+
+    if (!token) {
+      continue;
+    }
+
+    finalAnswer += token;
+
+    onToken?.(token);
+  }
+
+  return finalAnswer;
+}

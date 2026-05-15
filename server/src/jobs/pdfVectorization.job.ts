@@ -43,16 +43,21 @@ export async function runPdfVectorizationJob(
 
     logger.info(`[PdfVectorizationJob] Starting — source: "${source}"`);
 
-    const result = await pdfService.processForVectorization(
-        storedPath,
-        chunkOptions,
-        embedOptions,
-    );
+    const result =
+        await pdfService.processForVectorization(
+            storedPath,
+
+            source,
+
+            chunkOptions,
+
+            embedOptions,
+        );
 
     console.log(
         '🚀 Attempting to store chunks:',
         result.embeddedChunks.length,
-      );
+    );
     await storeEmbeddedChunks({
         chunks: result.embeddedChunks,
     });

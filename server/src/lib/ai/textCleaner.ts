@@ -1,4 +1,3 @@
-// src/lib/ai/textCleaner.ts
 // Normalises raw PDF-extracted text before chunking.
 // Pure functions — no I/O, no side-effects.
 

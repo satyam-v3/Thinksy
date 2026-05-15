@@ -20,8 +20,7 @@ import { useTheme } from "./hooks/useTheme";
 
 import {
   describeError,
-  extractAnswer,
-  sendChatQuery,
+  streamChatQuery,
 } from "./lib/api";
 
 import { storage } from "./lib/storage";
@@ -128,32 +127,67 @@ export default function App() {
             content: m.content,
           }));
 
-      const data =
-        await sendChatQuery({
+      let streamedText = '';
+
+      let frame: number | null =
+        null;
+
+      const flushUpdate = () => {
+        updateMessage(
+          chat.id,
+          assistantId,
+          {
+            content:
+              streamedText,
+
+            pending: true,
+          },
+        );
+
+        frame = null;
+      };
+
+      await streamChatQuery(
+        {
           query: text,
           history,
-        });
+        },
 
-      const answer =
-        extractAnswer(data) ||
-        "_No answer returned._";
-
-      const sources =
-        (data.sources as
-          | Source[]
-          | undefined) || [];
-
-      updateMessage(
-        chat.id,
-        assistantId,
         {
-          content: answer,
+          onToken(token) {
+            streamedText += token;
 
-          sources,
+            if (!frame) {
+              frame =
+                requestAnimationFrame(
+                  flushUpdate,
+                );
+            }
+          },
 
-          pending: false,
-        }
+          onDone(sources) {
+            if (frame) {
+              cancelAnimationFrame(
+                frame,
+              );
+            }
+
+            updateMessage(
+              chat.id,
+              assistantId,
+              {
+                content:
+                  streamedText,
+
+                sources,
+
+                pending: false,
+              },
+            );
+          },
+        },
       );
+
     } catch (e) {
       const msg =
         describeError(e);
@@ -167,10 +201,11 @@ export default function App() {
           error: msg,
 
           content: "",
-        }
+        },
       );
 
       toast.error(msg);
+
     } finally {
       setLoading(false);
     }

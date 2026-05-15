@@ -1,5 +1,3 @@
-// src/lib/ai/chunker.ts
-
 import type {
     ChunkOptions,
     ChunkMetadata,
@@ -191,13 +189,20 @@ export function chunkText(
             const metadata: ChunkMetadata =
             {
                 chunkId: `${source}-chunk-${chunkIndex}`,
+
                 source,
+
+                originalName:
+                    options.originalName,
+
                 chunkIndex,
+
                 pageInfo:
                     resolvePageInfo(
                         cursor,
                         pageMarkers,
                     ),
+
                 createdAt,
             };
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import type {
     CSSProperties,
@@ -9,6 +9,8 @@ import type {
 import ReactMarkdown from "react-markdown";
 
 import remarkGfm from "remark-gfm";
+
+import rehypeRaw from "rehype-raw";
 
 import {
     Prism as SyntaxHighlighterRaw,
@@ -107,6 +109,27 @@ export function MessageBubble({
         }
     };
 
+    /**
+     * Transform:
+     * [1]
+     * [2]
+     *
+     * into clickable citation spans.
+     */
+
+    const processedContent =
+        useMemo(() => {
+            return (
+                message.content || ""
+            ).replace(
+                /\[(\d+)\]/g,
+
+                (_, n) => {
+                    return `<span data-source="${n}" class="citation-pill">[${n}]</span>`;
+                },
+            );
+        }, [message.content]);
+
     return (
         <div
             data-testid={`message-${message.role}`}
@@ -163,6 +186,9 @@ export function MessageBubble({
                                 remarkPlugins={[
                                     remarkGfm,
                                 ]}
+                                rehypePlugins={[
+                                    rehypeRaw,
+                                ]}
                                 components={{
                                     code({
                                         className,
@@ -218,9 +244,46 @@ export function MessageBubble({
                                             </code>
                                         );
                                     },
+
+                                    span({
+                                        children,
+                                        ...props
+                                    }: any) {
+                                        const source =
+                                            props["data-source"];
+
+                                        if (!source) {
+                                            return (
+                                                <span {...props}>
+                                                    {children}
+                                                </span>
+                                            );
+                                        }
+
+                                        return (
+                                            <button
+                                                className="mx-1 inline-flex items-center rounded-md bg-accent/15 px-1.5 py-0.5 text-xs font-medium text-accent transition-colors hover:bg-accent/25"
+                                                onClick={() => {
+                                                    document
+                                                        .getElementById(
+                                                            `source-${source}`,
+                                                        )
+                                                        ?.scrollIntoView({
+                                                            behavior:
+                                                                "smooth",
+
+                                                            block:
+                                                                "center",
+                                                        });
+                                                }}
+                                            >
+                                                {children}
+                                            </button>
+                                        );
+                                    },
                                 }}
                             >
-                                {message.content || ""}
+                                {processedContent}
                             </ReactMarkdown>
                         </div>
                     )}

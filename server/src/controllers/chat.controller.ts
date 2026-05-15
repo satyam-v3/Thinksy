@@ -39,8 +39,62 @@ export const chatController = {
     const result = await chatService.queryKnowledgeBase(parsed.data);
     res.status(200).json({
       answer: result.answer,
-      sources: result.matches,
+      sources: result.sources,
     });
+  },
+  stream: async (
+    req: Request,
+    res: Response,
+  ): Promise<void> => {
+    const parsed =
+      chatQuerySchema.safeParse(
+        req.body,
+      );
+
+    if (!parsed.success) {
+      throw ApiError.badRequest(
+        'Invalid chat query payload',
+        parsed.error.flatten(),
+      );
+    }
+
+    res.setHeader(
+      'Content-Type',
+      'text/event-stream',
+    );
+
+    res.setHeader(
+      'Cache-Control',
+      'no-cache',
+    );
+
+    res.setHeader(
+      'Connection',
+      'keep-alive',
+    );
+
+    const result =
+      await chatService.streamKnowledgeBase(
+        parsed.data,
+        (token) => {
+          res.write(
+            `data: ${JSON.stringify({
+              token,
+            })}\n\n`,
+          );
+        },
+      );
+
+    res.write(
+      `data: ${JSON.stringify({
+        done: true,
+
+        sources:
+          result.sources,
+      })}\n\n`,
+    );
+
+    res.end();
   },
   debugVectors: async (_req: Request, res: Response): Promise<void> => {
     const result = await chatService.debugVectors();

@@ -1,3 +1,4 @@
+import path from 'node:path';
 import express, { type Application, type RequestHandler } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -23,10 +24,18 @@ export function createApp(): Application {
   app.disable('x-powered-by');
   app.use(helmet());
   app.use(cors({ origin: config.corsOrigin, credentials: true }));
-  app.use(compression() as unknown as RequestHandler);
+  // app.use(compression() as unknown as RequestHandler);
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true }));
   app.use(requestLogger);
+
+  // --- ADDING STATIC FILE SERVING
+  app.use(
+    '/uploads',
+    express.static(
+      path.resolve('uploads'),
+    ),
+  );
 
   // --- Versioned API routes ---
   registerRoutes(app);

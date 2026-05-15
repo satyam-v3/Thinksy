@@ -1,6 +1,6 @@
 import { ChromaClient, type Collection } from 'chromadb';
 
-const DEFAULT_COLLECTION_NAME = 'thinksy-documents';
+const DEFAULT_COLLECTION_NAME = 'thinksy-documents-v2';
 
 let cachedClient: ChromaClient | null = null;
 

@@ -14,13 +14,15 @@ export interface StoreEmbeddedChunksResult {
   ids: string[];
 }
 
-function toChromaMetadata(chunk: EmbeddedChunk): ChromaMetadataRecord {
+function toChromaMetadata(
+  chunk: EmbeddedChunk,
+): ChromaMetadataRecord {
   return {
-    chunkId: chunk.metadata.chunkId,
-    source: chunk.metadata.source,
-    chunkIndex: chunk.metadata.chunkIndex,
-    pageInfo: chunk.metadata.pageInfo ?? '',
-    createdAt: chunk.metadata.createdAt,
+    ...chunk.metadata,
+
+    pageInfo:
+      chunk.metadata.pageInfo ??
+      '',
   };
 }
 

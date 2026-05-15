@@ -64,7 +64,11 @@ export const pdfService = {
    */
   async processForVectorization(
     storedPath: string,
+
+    originalName?: string,
+
     chunkOpts?: ChunkOptions,
+
     embedOpts?: EmbedOptions,
   ): Promise<VectorizationResult> {
     const source = path.basename(storedPath);
@@ -98,8 +102,13 @@ export const pdfService = {
       source,
       {
         chunkSize: 500,
+
         overlap: 100,
+
         source,
+
+        originalName,
+
         ...chunkOpts,
       },
     );

@@ -13,6 +13,8 @@ export interface RetrievalMatch {
 
   source: string;
 
+  originalName?: string;
+
   pageInfo: string | null;
 
   chunkIndex: number | null;
@@ -155,6 +157,12 @@ export async function retrieveRelevantChunks(
               'string'
               ? metadata.source
               : 'Unknown',
+
+          originalName:
+            typeof metadata.originalName ===
+              'string'
+              ? metadata.originalName
+              : undefined,
 
           pageInfo:
             typeof metadata.pageInfo ===

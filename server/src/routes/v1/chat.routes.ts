@@ -11,4 +11,12 @@ debugRouter.get(
 
 export const chatRouter = Router();
 
-chatRouter.post('/query', asyncHandler(chatController.query));
+chatRouter.post(
+    '/query',
+    asyncHandler(chatController.query),
+);
+
+chatRouter.post(
+    '/stream',
+    asyncHandler(chatController.stream),
+);
