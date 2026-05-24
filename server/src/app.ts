@@ -33,7 +33,10 @@ export function createApp(): Application {
   app.use(
     '/uploads',
     express.static(
-      path.resolve('uploads'),
+      path.join(
+        process.cwd(),
+        'uploads',
+      ),
     ),
   );
 

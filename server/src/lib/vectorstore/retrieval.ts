@@ -15,6 +15,8 @@ export interface RetrievalMatch {
 
   originalName?: string;
 
+  storedFilename?: string;
+
   pageInfo: string | null;
 
   chunkIndex: number | null;
@@ -32,6 +34,8 @@ export interface RetrieveChunksInput {
   question: string;
 
   topK?: number;
+
+  activeDocs?: string[];
 }
 
 export interface RetrieveChunksResult {
@@ -110,6 +114,17 @@ export async function retrieveRelevantChunks(
         'metadatas',
         'distances',
       ],
+
+      where:
+        input.activeDocs &&
+          input.activeDocs.length > 0
+          ? {
+            source: {
+              $in:
+                input.activeDocs,
+            },
+          }
+          : undefined,
     });
 
   const documents =
@@ -162,6 +177,12 @@ export async function retrieveRelevantChunks(
             typeof metadata.originalName ===
               'string'
               ? metadata.originalName
+              : undefined,
+
+          storedFilename:
+            typeof metadata.storedFilename ===
+              'string'
+              ? metadata.storedFilename
               : undefined,
 
           pageInfo:

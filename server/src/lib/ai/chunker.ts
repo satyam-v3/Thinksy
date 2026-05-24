@@ -186,14 +186,16 @@ export function chunkText(
             .trim();
 
         if (slice.length > 0) {
-            const metadata: ChunkMetadata =
-            {
+            const metadata: ChunkMetadata = {
                 chunkId: `${source}-chunk-${chunkIndex}`,
 
                 source,
 
                 originalName:
                     options.originalName,
+
+                storedFilename:
+                    source,
 
                 chunkIndex,
 

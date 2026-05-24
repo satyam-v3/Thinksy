@@ -125,6 +125,8 @@ export async function sendChatQuery(
     payload: {
         query: string;
 
+        activeDocs?: string[];
+
         history?: {
             role: string;
 
@@ -149,6 +151,10 @@ export async function sendChatQuery(
                 history:
                     payload.history ??
                     [],
+
+                activeDocs:
+                    payload.activeDocs ??
+                    [],
             },
         );
 
@@ -162,6 +168,8 @@ export async function sendChatQuery(
 export async function streamChatQuery(
     payload: {
         query: string;
+
+        activeDocs?: string[];
 
         history?: {
             role: string;
@@ -204,6 +212,10 @@ export async function streamChatQuery(
 
                     history:
                         payload.history ??
+                        [],
+
+                    activeDocs:
+                        payload.activeDocs ??
                         [],
                 }),
             },

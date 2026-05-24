@@ -81,14 +81,26 @@ export function PdfUpload({
                 setProgress
             );
 
+            console.log(
+                'UPLOAD RESPONSE:',
+                res
+            );
+
+
             const doc: UploadedDoc = {
                 id: uuid(),
 
-                filename: file.name,
+                filename:
+                    res.data.originalName,
+
+                storedFilename:
+                    res.data.filename,
 
                 size: file.size,
 
                 uploadedAt: Date.now(),
+
+                active: true,
 
                 response: res,
             };

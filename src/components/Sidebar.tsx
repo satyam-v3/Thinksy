@@ -52,6 +52,10 @@ interface Props {
     setOpen: (
         v: boolean
     ) => void;
+
+    onToggleDoc: (
+        id: string,
+    ) => void;
 }
 
 export function Sidebar({
@@ -64,6 +68,7 @@ export function Sidebar({
     onDocsChange,
     open,
     setOpen,
+    onToggleDoc
 }: Props) {
     const [hovered, setHovered] =
         useState<string | null>(null);
@@ -166,7 +171,12 @@ export function Sidebar({
                     <PdfUpload
                         onUploaded={(d) =>
                             onDocsChange([
-                                d,
+                                {
+                                    ...d,
+
+                                    active: true,
+                                },
+
                                 ...docs,
                             ])
                         }
@@ -194,34 +204,67 @@ export function Sidebar({
                             {docs.map((d) => (
                                 <div
                                     key={d.id}
-                                    className="group flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-surface2"
+                                    className={cn(
+                                        "group rounded-xl border transition-all",
+
+                                        d.active
+                                            ? "border-accent bg-accent/10"
+                                            : "border-border bg-surface hover:bg-surface2",
+                                    )}
                                     data-testid={`doc-item-${d.id}`}
                                 >
-                                    <FileText className="h-3.5 w-3.5 shrink-0 text-accent" />
-
-                                    <div className="min-w-0 flex-1">
-                                        <div className="truncate text-xs text-fg">
-                                            {d.filename}
-                                        </div>
-
-                                        <div className="text-[10px] text-muted">
-                                            {formatBytes(
-                                                d.size
-                                            )}
-                                        </div>
-                                    </div>
-
                                     <button
                                         onClick={() =>
-                                            removeDoc(
-                                                d.id
-                                            )
+                                            onToggleDoc(d.id)
                                         }
-                                        className="opacity-0 transition-opacity group-hover:opacity-100"
-                                        aria-label="Remove doc"
+                                        className="flex w-full items-center gap-2 px-3 py-2 text-left"
                                     >
-                                        <X className="h-3.5 w-3.5 text-muted hover:text-fg" />
+                                        <FileText
+                                            className={cn(
+                                                "h-3.5 w-3.5 shrink-0",
+
+                                                d.active
+                                                    ? "text-accent"
+                                                    : "text-muted",
+                                            )}
+                                        />
+
+                                        <div className="min-w-0 flex-1">
+                                            <div className="truncate text-xs text-fg">
+                                                {d.filename}
+                                            </div>
+
+                                            <div className="flex items-center gap-2 text-[10px] text-muted">
+                                                <span>
+                                                    {formatBytes(
+                                                        d.size,
+                                                    )}
+                                                </span>
+
+                                                <span
+                                                    className={cn(
+                                                        "h-2 w-2 rounded-full",
+
+                                                        d.active
+                                                            ? "bg-green-500"
+                                                            : "bg-muted",
+                                                    )}
+                                                />
+                                            </div>
+                                        </div>
                                     </button>
+
+                                    <div className="flex items-center justify-end px-2 pb-2">
+                                        <button
+                                            onClick={() =>
+                                                removeDoc(d.id)
+                                            }
+                                            className="rounded-md p-1 text-muted transition-colors hover:bg-surface2 hover:text-red-500"
+                                            aria-label="Remove doc"
+                                        >
+                                            <X className="h-3.5 w-3.5" />
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                         </div>

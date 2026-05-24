@@ -68,6 +68,23 @@ export default function App() {
   const [loading, setLoading] =
     useState(false);
 
+  const toggleDocActive = (
+    id: string,
+  ) => {
+    setDocs((prev) =>
+      prev.map((doc) =>
+        doc.id === id
+          ? {
+            ...doc,
+
+            active:
+              !doc.active,
+          }
+          : doc,
+      ),
+    );
+  };
+
   useEffect(() => {
     storage.saveDocs(docs);
   }, [docs]);
@@ -147,10 +164,22 @@ export default function App() {
         frame = null;
       };
 
+      const activeDocs =
+        docs
+          .filter(
+            (d) => d.active,
+          )
+          .map(
+            (d) => d.filename,
+          );
+
       await streamChatQuery(
         {
           query: text,
+
           history,
+
+          activeDocs,
         },
 
         {
@@ -248,6 +277,9 @@ export default function App() {
         docs={docs}
         onDocsChange={
           setDocs
+        }
+        onToggleDoc={
+          toggleDocActive
         }
         open={sidebarOpen}
         setOpen={

@@ -9,10 +9,20 @@ export interface ChatMessage {
   content: string;
 }
 
+export interface ChatMessage {
+  role:
+  | 'user'
+  | 'assistant';
+
+  content: string;
+}
+
 export interface ChatQueryInput {
   question: string;
 
   topK?: number;
+
+  activeDocs?: string[];
 
   history?: ChatMessage[];
 }
@@ -24,7 +34,11 @@ export const chatService = {
     const retrieval =
       await retrieveRelevantChunks({
         question: input.question,
+
         topK: input.topK,
+
+        activeDocs:
+          input.activeDocs,
       });
 
     const { generateAnswer } =

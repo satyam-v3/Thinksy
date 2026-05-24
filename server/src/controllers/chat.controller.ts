@@ -5,29 +5,43 @@ import { chatService } from '../services/chat.service';
 import { ApiResponse } from '../utils/ApiResponse';
 import { ApiError } from '../utils/ApiError';
 
-const chatQuerySchema = z.object({
-  question: z.string().trim().min(1),
+const chatQuerySchema =
+  z.object({
+    question:
+      z.string()
+        .trim()
+        .min(
+          1,
+          'Question is required',
+        ),
 
-  topK: z.coerce
-    .number()
-    .int()
-    .min(1)
-    .max(20)
-    .optional(),
+    topK:
+      z.coerce
+        .number()
+        .int()
+        .min(1)
+        .max(20)
+        .optional(),
 
-  history: z
-    .array(
-      z.object({
-        role: z.enum([
-          'user',
-          'assistant',
-        ]),
+    activeDocs:
+      z.array(
+        z.string(),
+      ).optional(),
 
-        content: z.string(),
-      }),
-    )
-    .optional(),
-});
+    history:
+      z.array(
+        z.object({
+          role:
+            z.enum([
+              'user',
+              'assistant',
+            ]),
+
+          content:
+            z.string(),
+        }),
+      ).optional(),
+  });
 
 export const chatController = {
   query: async (req: Request, res: Response): Promise<void> => {

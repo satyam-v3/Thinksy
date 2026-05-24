@@ -264,17 +264,21 @@ export function MessageBubble({
                                             <button
                                                 className="mx-1 inline-flex items-center rounded-md bg-accent/15 px-1.5 py-0.5 text-xs font-medium text-accent transition-colors hover:bg-accent/25"
                                                 onClick={() => {
-                                                    document
-                                                        .getElementById(
+                                                    const element =
+                                                        document.getElementById(
                                                             `source-${source}`,
-                                                        )
-                                                        ?.scrollIntoView({
-                                                            behavior:
-                                                                "smooth",
+                                                        );
 
-                                                            block:
-                                                                "center",
+                                                    if (element) {
+                                                        element.dataset.highlight =
+                                                            "true";
+
+                                                        element.scrollIntoView({
+                                                            behavior: "smooth",
+
+                                                            block: "center",
                                                         });
+                                                    }
                                                 }}
                                             >
                                                 {children}

@@ -51,6 +51,8 @@ export interface ChunkMetadata {
 
   originalName?: string;
 
+  storedFilename?: string;
+
   /**
    * Position in chunk array
    */

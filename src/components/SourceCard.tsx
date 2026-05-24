@@ -1,4 +1,7 @@
-import { useState } from "react";
+import {
+    useEffect,
+    useState,
+} from "react";
 
 import {
     ChevronDown,
@@ -48,7 +51,11 @@ export function SourceCard({
     source,
     index,
 }: Props) {
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] =
+        useState(false);
+
+    const [highlighted, setHighlighted] =
+        useState(false);
 
     const name =
         (source.originalName as string) ||
@@ -61,34 +68,99 @@ export function SourceCard({
         (source.content as string) ||
         "";
 
-    const page = pageLabel(source.pageInfo);
+    const page = pageLabel(
+        source.pageInfo,
+    );
 
     const similarity =
         typeof source.similarity ===
             "number"
             ? `${Math.round(
-                source.similarity * 100
+                source.similarity *
+                100,
             )}%`
             : null;
 
     const chunkId =
-        source.chunkId as string | undefined;
+        source.chunkId as
+        | string
+        | undefined;
+
+    const storedFilename =
+        source.storedFilename;
 
     const pdfUrl =
-        name &&
-            name !== `Source ${index + 1}`
-            ? `http://localhost:4000/uploads/${name}`
+        storedFilename
+            ? `http://localhost:4000/uploads/${storedFilename}`
             : null;
+
+    useEffect(() => {
+        const element =
+            document.getElementById(
+                `source-${index + 1}`,
+            );
+
+        if (!element) {
+            return;
+        }
+
+        const observer =
+            new IntersectionObserver(
+                (entries) => {
+                    const visible =
+                        entries[0]
+                            ?.isIntersecting;
+
+                    if (
+                        visible &&
+                        element.dataset
+                            .highlight ===
+                        "true"
+                    ) {
+                        setHighlighted(
+                            true,
+                        );
+
+                        element.dataset.highlight =
+                            "false";
+
+                        setTimeout(
+                            () => {
+                                setHighlighted(
+                                    false,
+                                );
+                            },
+                            2000,
+                        );
+                    }
+                },
+                {
+                    threshold: 0.5,
+                },
+            );
+
+        observer.observe(element);
+
+        return () =>
+            observer.disconnect();
+    }, [index]);
 
     return (
         <div
             id={`source-${index + 1}`}
             data-testid={`source-card-${index}`}
-            className="card overflow-hidden transition-colors hover:border-fg/30"
+            className={cn(
+                "card overflow-hidden transition-all duration-500 hover:border-fg/30",
+
+                highlighted &&
+                "border-accent ring-2 ring-accent shadow-lg shadow-accent/20",
+            )}
         >
             <button
                 onClick={() =>
-                    setOpen((v) => !v)
+                    setOpen(
+                        (v) => !v,
+                    )
                 }
                 className="flex w-full items-start gap-3 px-3.5 py-3 text-left"
             >
@@ -103,36 +175,52 @@ export function SourceCard({
                         </span>
 
                         <span className="truncate text-sm font-medium text-fg">
-                            {truncate(name, 64)}
+                            {truncate(
+                                name,
+                                64,
+                            )}
                         </span>
 
-                        {source.chunkIndex != null && (
-                            <span className="ml-2 text-[10px] text-muted">
-                                chunk {source.chunkIndex}
-                            </span>
-                        )}
+                        {source.chunkIndex !=
+                            null && (
+                                <span className="ml-2 text-[10px] text-muted">
+                                    chunk{" "}
+                                    {
+                                        source.chunkIndex
+                                    }
+                                </span>
+                            )}
                     </div>
 
                     <div className="mt-1 flex flex-wrap items-center gap-1.5">
                         {page && (
                             <span className="chip">
                                 <Hash className="h-3 w-3" />
-                                page {page}
+                                page{" "}
+                                {page}
                             </span>
                         )}
 
                         {similarity && (
                             <span className="chip">
-                                🎯 {similarity} match
+                                🎯{" "}
+                                {
+                                    similarity
+                                }{" "}
+                                match
                             </span>
                         )}
 
                         {pdfUrl && (
                             <a
-                                href={pdfUrl}
+                                href={
+                                    pdfUrl
+                                }
                                 target="_blank"
                                 rel="noreferrer"
-                                onClick={(e) =>
+                                onClick={(
+                                    e,
+                                ) =>
                                     e.stopPropagation()
                                 }
                                 className="chip hover:border-fg/30 hover:text-fg"
@@ -144,33 +232,42 @@ export function SourceCard({
 
                         {chunkId && (
                             <span className="chip font-mono">
-                                {truncate(chunkId, 14)}
+                                {truncate(
+                                    chunkId,
+                                    14,
+                                )}
                             </span>
                         )}
                     </div>
 
-                    {content && !open && (
-                        <p className="mt-2 line-clamp-2 text-xs text-muted">
-                            {truncate(content, 220)}
-                        </p>
-                    )}
+                    {content &&
+                        !open && (
+                            <p className="mt-2 line-clamp-2 text-xs text-muted">
+                                {truncate(
+                                    content,
+                                    220,
+                                )}
+                            </p>
+                        )}
                 </div>
 
                 <ChevronDown
                     className={cn(
                         "mt-1 h-4 w-4 shrink-0 text-muted transition-transform",
-                        open && "rotate-180"
+                        open &&
+                        "rotate-180",
                     )}
                 />
             </button>
 
-            {open && content && (
-                <div className="border-t border-border bg-surface2/50 px-3.5 py-3">
-                    <p className="whitespace-pre-wrap text-xs leading-relaxed text-fg/90">
-                        {content}
-                    </p>
-                </div>
-            )}
+            {open &&
+                content && (
+                    <div className="border-t border-border bg-surface2/50 px-3.5 py-3">
+                        <p className="whitespace-pre-wrap text-xs leading-relaxed text-fg/90">
+                            {content}
+                        </p>
+                    </div>
+                )}
         </div>
     );
 }

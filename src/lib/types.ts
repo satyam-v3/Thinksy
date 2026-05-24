@@ -9,6 +9,10 @@ export interface Source {
 
     source?: string;
 
+    originalName?: string;
+
+    storedFilename?: string;
+
     pageInfo?:
     | string
     | number
@@ -58,10 +62,16 @@ export interface Chat {
 
 export interface UploadedDoc {
     id: string;
-    filename: string;
+
+    filename: string; // display name
+
+    storedFilename: string; // actual server file
 
     uploadedAt: number;
 
     size?: number;
+
     response?: unknown;
+
+    active?: boolean;
 }
