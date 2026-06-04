@@ -20,6 +20,10 @@ import {
 interface Props {
     source: Source;
     index: number;
+
+    onOpenPdf?: (
+        pdfUrl: string,
+    ) => void;
 }
 
 function pageLabel(
@@ -50,6 +54,7 @@ function pageLabel(
 export function SourceCard({
     source,
     index,
+    onOpenPdf,
 }: Props) {
     const [open, setOpen] =
         useState(false);
@@ -212,22 +217,24 @@ export function SourceCard({
                         )}
 
                         {pdfUrl && (
-                            <a
-                                href={
-                                    pdfUrl
-                                }
-                                target="_blank"
-                                rel="noreferrer"
-                                onClick={(
-                                    e,
-                                ) =>
-                                    e.stopPropagation()
-                                }
-                                className="chip hover:border-fg/30 hover:text-fg"
+                            <span
+                                role="button"
+                                tabIndex={0}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+
+                                    if (
+                                        pdfUrl &&
+                                        onOpenPdf
+                                    ) {
+                                        onOpenPdf(pdfUrl);
+                                    }
+                                }}
+                                className="chip cursor-pointer hover:border-fg/30 hover:text-fg"
                             >
                                 <ExternalLink className="h-3 w-3" />
                                 open pdf
-                            </a>
+                            </span>
                         )}
 
                         {chunkId && (

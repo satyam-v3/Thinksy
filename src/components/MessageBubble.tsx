@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 
+import { PdfViewerModal } from "./PdfViewerModal";
+
 import type {
     CSSProperties,
     FC,
@@ -92,6 +94,11 @@ export function MessageBubble({
 
     const [copied, setCopied] =
         useState(false);
+
+    const [pdfUrl, setPdfUrl] =
+        useState<string | null>(
+            null,
+        );
 
     const copy = async () => {
         try {
@@ -321,6 +328,9 @@ export function MessageBubble({
                                             }
                                             source={s}
                                             index={i}
+                                            onOpenPdf={
+                                                setPdfUrl
+                                            }
                                         />
                                     )
                                 )}
@@ -366,6 +376,14 @@ export function MessageBubble({
                         )}
                 </div>
             </div>
+
+            <PdfViewerModal
+                open={!!pdfUrl}
+                pdfUrl={pdfUrl}
+                onClose={() =>
+                    setPdfUrl(null)
+                }
+            />
 
             {isUser && (
                 <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface2 text-fg">
