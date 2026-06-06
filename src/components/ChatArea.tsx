@@ -1,6 +1,7 @@
 import {
     useEffect,
     useRef,
+    useState,
 } from "react";
 
 import {
@@ -9,12 +10,25 @@ import {
     Lightbulb,
     Menu,
     Sparkles,
+    Brain,
 } from "lucide-react";
 
 import type {
     Chat,
     Message,
 } from "../lib/types";
+
+import {
+    generateFlashcards,
+} from "../lib/flashcards";
+
+import type {
+    Flashcard,
+} from "../lib/flashcards";
+
+import {
+    FlashcardModal,
+} from "./FlashcardModal";
 
 import { ChatInput } from "./ChatInput";
 
@@ -32,6 +46,8 @@ interface Props {
     onOpenSidebar: () => void;
 
     loading: boolean;
+
+    activeDocs: string[];
 }
 
 const SUGGESTIONS = [
@@ -128,12 +144,60 @@ export function ChatArea({
     onSend,
     onOpenSidebar,
     loading,
+    activeDocs,
 }: Props) {
     const scrollRef =
         useRef<HTMLDivElement>(null);
 
     const messages: Message[] =
         chat?.messages ?? [];
+
+    const [flashcards, setFlashcards] =
+        useState<Flashcard[]>([]);
+
+    const [flashcardOpen,
+        setFlashcardOpen] =
+        useState(false);
+
+    const [loadingCards,
+        setLoadingCards] =
+        useState(false);
+
+    const handleFlashcards =
+        async () => {
+            try {
+                setLoadingCards(true);
+
+                if (
+                    activeDocs.length === 0
+                ) {
+                    alert(
+                        "Please select a PDF first.",
+                    );
+
+                    return;
+                }
+
+                const cards =
+                    await generateFlashcards(
+                        "main concepts",
+                        activeDocs,
+                    );
+
+                setFlashcards(cards);
+
+                setFlashcardOpen(true);
+
+            } catch (error) {
+                console.error(
+                    "Flashcard error:",
+                    error,
+                );
+
+            } finally {
+                setLoadingCards(false);
+            }
+        };
 
     useEffect(() => {
         const el = scrollRef.current;
@@ -185,7 +249,22 @@ export function ChatArea({
                     </div>
                 </div>
 
-                <PdfUpload compact />
+                <div className="flex items-center gap-2">
+
+                    <button
+                        onClick={handleFlashcards}
+                        disabled={loadingCards}
+                        className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:bg-surface2 disabled:opacity-50"
+                    >
+                        <Brain className="h-4 w-4" />
+
+                        {loadingCards
+                            ? "Generating..."
+                            : "Flashcards"}
+                    </button>
+
+                    <PdfUpload compact />
+                </div>
             </div>
 
             {/* Messages */}
@@ -228,6 +307,14 @@ export function ChatArea({
                     />
                 </div>
             </div>
+
+            <FlashcardModal
+                open={flashcardOpen}
+                flashcards={flashcards}
+                onClose={() =>
+                    setFlashcardOpen(false)
+                }
+            />
         </div>
     );
 }

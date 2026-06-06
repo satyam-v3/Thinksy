@@ -90,6 +90,12 @@ function keywordScore(
 export async function retrieveRelevantChunks(
   input: RetrieveChunksInput,
 ): Promise<RetrieveChunksResult> {
+
+  // ////////////////////////////////
+  console.log("FILTER:");
+  console.log(input.activeDocs);
+  // ////////////////////////////////
+
   const topK =
     input.topK ?? DEFAULT_TOP_K;
 

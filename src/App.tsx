@@ -72,16 +72,10 @@ export default function App() {
     id: string,
   ) => {
     setDocs((prev) =>
-      prev.map((doc) =>
-        doc.id === id
-          ? {
-            ...doc,
-
-            active:
-              !doc.active,
-          }
-          : doc,
-      ),
+      prev.map((doc) => ({
+        ...doc,
+        active: doc.id === id,
+      })),
     );
   };
 
@@ -170,7 +164,9 @@ export default function App() {
             (d) => d.active,
           )
           .map(
-            (d) => d.filename,
+            (d) =>
+              d.storedFilename ??
+              d.filename,
           );
 
       await streamChatQuery(
@@ -262,6 +258,17 @@ export default function App() {
     }
   };
 
+  const activeDocs =
+    docs
+      .filter(
+        (d) => d.active,
+      )
+      .map(
+        (d) =>
+          d.storedFilename ??
+          d.filename,
+      );
+
   return (
     <div className="grain flex h-screen w-screen overflow-hidden bg-bg text-fg">
       <Sidebar
@@ -290,13 +297,12 @@ export default function App() {
       <main className="flex min-w-0 flex-1 flex-col">
         <ChatArea
           chat={activeChat}
-          onSend={
-            handleSend
-          }
+          onSend={handleSend}
           onOpenSidebar={() =>
             setSidebarOpen(true)
           }
           loading={loading}
+          activeDocs={activeDocs}
         />
       </main>
 

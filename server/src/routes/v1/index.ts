@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { healthRouter } from './health.routes';
 import { pdfRouter } from './pdf.routes';
 import { chatRouter, debugRouter } from './chat.routes';
+import { flashcardRouter } from "./flashcard.routes";
 
 /**
  * v1 route registry.
@@ -20,3 +21,4 @@ v1Router.use('/health', healthRouter);
 v1Router.use('/pdf', pdfRouter);
 v1Router.use('/chat', chatRouter);
 v1Router.use('/debug', debugRouter);
+v1Router.use('/flashcards', flashcardRouter);
