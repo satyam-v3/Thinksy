@@ -10,18 +10,15 @@ import { ApiError } from "../utils/ApiError";
 import { retrieveRelevantChunks } from "../lib/vectorstore/retrieval";
 
 import {
-    generateFlashcards,
-} from "../services/flashcard.service";
+    generateQuiz,
+} from "../services/quiz.service";
 
-const flashcardSchema =
+const quizSchema =
     z.object({
         topic:
             z.string()
                 .trim()
-                .min(
-                    1,
-                    "Topic is required",
-                ),
+                .min(1),
 
         count:
             z.coerce
@@ -37,19 +34,20 @@ const flashcardSchema =
             ).optional(),
     });
 
-export const flashcardController = {
+export const quizController = {
     generate: async (
         req: Request,
         res: Response,
     ): Promise<void> => {
+
         const parsed =
-            flashcardSchema.safeParse(
+            quizSchema.safeParse(
                 req.body,
             );
 
         if (!parsed.success) {
             throw ApiError.badRequest(
-                "Invalid flashcard payload",
+                "Invalid quiz payload",
                 parsed.error.flatten(),
             );
         }
@@ -62,9 +60,7 @@ export const flashcardController = {
                 topK: 10,
 
                 activeDocs:
-                    parsed.data
-                        .activeDocs,
-
+                    parsed.data.activeDocs,
             });
 
         const context =
@@ -74,15 +70,15 @@ export const flashcardController = {
                 )
                 .join("\n\n");
 
-        const flashcards =
-            await generateFlashcards(
+        const questions =
+            await generateQuiz(
                 context,
                 parsed.data.count ??
                 10,
             );
 
         res.status(200).json({
-            flashcards,
+            questions,
         });
     },
 };

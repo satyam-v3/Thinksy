@@ -30,6 +30,18 @@ import {
     FlashcardModal,
 } from "./FlashcardModal";
 
+import {
+    generateQuiz,
+} from "../lib/quiz";
+
+import type {
+    QuizQuestion,
+} from "../lib/quiz";
+
+import {
+    QuizModal,
+} from "./QuizModal";
+
 import { ChatInput } from "./ChatInput";
 
 import { MessageBubble } from "./MessageBubble";
@@ -163,6 +175,18 @@ export function ChatArea({
         setLoadingCards] =
         useState(false);
 
+    const [quizQuestions,
+        setQuizQuestions] =
+        useState<QuizQuestion[]>([]);
+
+    const [quizOpen,
+        setQuizOpen] =
+        useState(false);
+
+    const [loadingQuiz,
+        setLoadingQuiz] =
+        useState(false);
+
     const handleFlashcards =
         async () => {
             try {
@@ -196,6 +220,48 @@ export function ChatArea({
 
             } finally {
                 setLoadingCards(false);
+            }
+        };
+
+    const handleQuiz =
+        async () => {
+            try {
+                setLoadingQuiz(true);
+
+                if (
+                    activeDocs.length === 0
+                ) {
+                    alert(
+                        "Please select a PDF first.",
+                    );
+
+                    return;
+                }
+
+                const questions =
+                    await generateQuiz(
+                        "main concepts",
+                        activeDocs,
+                    );
+
+                setQuizQuestions(
+                    questions,
+                );
+
+                setQuizOpen(
+                    true,
+                );
+
+            } catch (error) {
+                console.error(
+                    "Quiz error:",
+                    error,
+                );
+
+            } finally {
+                setLoadingQuiz(
+                    false,
+                );
             }
         };
 
@@ -263,6 +329,18 @@ export function ChatArea({
                             : "Flashcards"}
                     </button>
 
+                    <button
+                        onClick={handleQuiz}
+                        disabled={loadingQuiz}
+                        className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:bg-surface2 disabled:opacity-50"
+                    >
+                        <FileQuestion className="h-4 w-4" />
+
+                        {loadingQuiz
+                            ? "Generating..."
+                            : "Quiz"}
+                    </button>
+
                     <PdfUpload compact />
                 </div>
             </div>
@@ -313,6 +391,16 @@ export function ChatArea({
                 flashcards={flashcards}
                 onClose={() =>
                     setFlashcardOpen(false)
+                }
+            />
+
+            <QuizModal
+                open={quizOpen}
+                questions={
+                    quizQuestions
+                }
+                onClose={() =>
+                    setQuizOpen(false)
                 }
             />
         </div>
