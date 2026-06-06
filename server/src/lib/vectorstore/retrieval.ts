@@ -142,81 +142,82 @@ export async function retrieveRelevantChunks(
   const distances =
     result.distances?.[0] ?? [];
 
-  const matches: RetrievalMatch[] =
+  const matches =
     documents
-      .map((doc, index) => {
-        if (!doc) {
-          return null;
-        }
+      .map<RetrievalMatch | null>(
+        (doc, index) => {
+          if (!doc) {
+            return null;
+          }
 
-        const distance =
-          distances?.[index] ?? null;
+          const distance =
+            distances?.[index] ?? null;
 
-        const metadata =
-          (metadatas?.[index] ??
-            {}) as RetrievalMetadata;
+          const metadata =
+            (metadatas?.[index] ??
+              {}) as RetrievalMetadata;
 
-        const similarity =
-          distanceToSimilarity(
+          const similarity =
+            distanceToSimilarity(
+              distance,
+            );
+
+          const rerankScore =
+            (similarity ?? 0) *
+            0.7 +
+            keywordScore(
+              input.question,
+              doc,
+            ) *
+            0.3;
+
+          return {
+            text: doc,
+
+            source:
+              typeof metadata.source ===
+                'string'
+                ? metadata.source
+                : 'Unknown',
+
+            originalName:
+              typeof metadata.originalName ===
+                'string'
+                ? metadata.originalName
+                : undefined,
+
+            storedFilename:
+              typeof metadata.storedFilename ===
+                'string'
+                ? metadata.storedFilename
+                : undefined,
+
+            pageInfo:
+              typeof metadata.pageInfo ===
+                'string'
+                ? metadata.pageInfo
+                : null,
+
+            chunkIndex:
+              typeof metadata.chunkIndex ===
+                'number'
+                ? metadata.chunkIndex
+                : null,
+
+            metadata,
+
             distance,
-          );
 
-        const rerankScore =
-          (similarity ?? 0) *
-          0.7 +
-          keywordScore(
-            input.question,
-            doc,
-          ) *
-          0.3;
+            similarity,
 
-        return {
-          text: doc,
-
-          source:
-            typeof metadata.source ===
-              'string'
-              ? metadata.source
-              : 'Unknown',
-
-          originalName:
-            typeof metadata.originalName ===
-              'string'
-              ? metadata.originalName
-              : undefined,
-
-          storedFilename:
-            typeof metadata.storedFilename ===
-              'string'
-              ? metadata.storedFilename
-              : undefined,
-
-          pageInfo:
-            typeof metadata.pageInfo ===
-              'string'
-              ? metadata.pageInfo
-              : null,
-
-          chunkIndex:
-            typeof metadata.chunkIndex ===
-              'number'
-              ? metadata.chunkIndex
-              : null,
-
-          metadata,
-
-          distance,
-
-          similarity,
-
-          rerankScore,
-        };
-      })
+            rerankScore,
+          };
+        })
       .filter(
         (
           m,
         ): m is RetrievalMatch =>
-          m !== null,
+          Boolean(m),
       );
 
   matches.sort(
