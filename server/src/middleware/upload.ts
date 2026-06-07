@@ -61,3 +61,5 @@ export const pdfUpload = multer({
     files: 1,
   },
 });
+
+console.log(config.maxUploadBytes);

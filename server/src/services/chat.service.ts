@@ -69,6 +69,8 @@ export const chatService = {
         question: input.question,
 
         topK: input.topK,
+
+        activeDocs: input.activeDocs
       });
 
     const { streamAnswer } =

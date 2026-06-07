@@ -54,8 +54,8 @@ export const chatPersistenceService = {
                 },
             },
             {
-                new: true,
-            },
+                returnDocument: 'after'
+              },
         );
     },
 
@@ -69,7 +69,7 @@ export const chatPersistenceService = {
                 title,
             },
             {
-                new: true,
+                returnDocument: 'after'
             },
         );
     },

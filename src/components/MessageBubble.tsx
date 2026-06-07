@@ -317,7 +317,7 @@ export function MessageBubble({
 
                             <div
                                 data-testid="sources-list"
-                                className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2"
+                                className="grid w-full grid-cols-1 gap-2 items-start sm:grid-cols-2"
                             >
                                 {message.sources.map(
                                     (s, i) => (

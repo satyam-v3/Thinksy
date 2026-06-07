@@ -10,7 +10,7 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().default('*'),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
   UPLOAD_DIR: z.string().default('uploads'),
-  MAX_UPLOAD_MB: z.coerce.number().positive().default(20),
+  MAX_UPLOAD_MB: z.coerce.number().positive().default(50),
 });
 
 const parsed = envSchema.safeParse(process.env);
