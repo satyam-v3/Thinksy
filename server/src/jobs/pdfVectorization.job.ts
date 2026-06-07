@@ -39,7 +39,7 @@ export interface PdfVectorizationJobPayload {
 export async function runPdfVectorizationJob(
     payload: PdfVectorizationJobPayload,
 ): Promise<VectorizationResult> {
-    const { storedPath, source, chunkOptions, embedOptions } = payload;
+    const { storedPath, source, chunkOptions, } = payload;
 
     logger.info(`[PdfVectorizationJob] Starting — source: "${source}"`);
 
@@ -51,13 +51,8 @@ export async function runPdfVectorizationJob(
 
             chunkOptions,
 
-            embedOptions,
         );
 
-    console.log(
-        '🚀 Attempting to store chunks:',
-        result.embeddedChunks.length,
-    );
     await storeEmbeddedChunks({
         chunks: result.embeddedChunks,
     });

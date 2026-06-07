@@ -1,34 +1,10 @@
-import type { Chat, UploadedDoc } from "./types";
+import type { UploadedDoc } from "./types";
 
-const CHATS_KEY = "thinksy:chats:v1";
 const DOCS_KEY = "thinksy:docs:v1";
 const ACTIVE_KEY = "thinksy:activeChat:v1";
 const THEME_KEY = "thinksy:theme:v1";
 
 export const storage = {
-    loadChats(): Chat[] {
-        try {
-            const raw = localStorage.getItem(CHATS_KEY);
-
-            return raw
-                ? (JSON.parse(raw) as Chat[])
-                : [];
-        } catch {
-            return [];
-        }
-    },
-
-    saveChats(chats: Chat[]) {
-        try {
-            localStorage.setItem(
-                CHATS_KEY,
-                JSON.stringify(chats)
-            );
-        } catch {
-            /* ignore quota */
-        }
-    },
-
     loadDocs(): UploadedDoc[] {
         try {
             const raw = localStorage.getItem(DOCS_KEY);

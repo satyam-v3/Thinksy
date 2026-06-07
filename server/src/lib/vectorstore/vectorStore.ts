@@ -54,9 +54,7 @@ export async function storeEmbeddedChunks(
       metadatas,
     });
 
-    console.log('✅ CHROMA ADD SUCCESS');
   } catch (error) {
-    console.error('❌ CHROMA ADD FAILED');
     console.error(error);
   }
 

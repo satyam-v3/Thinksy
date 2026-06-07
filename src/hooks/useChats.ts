@@ -5,24 +5,65 @@ import {
     useState,
 } from "react";
 
-import { v4 as uuid } from "uuid";
-
 import type { Chat, Message } from "../lib/types";
 
 import { storage } from "../lib/storage";
 
+import {
+    createChat,
+    getChats,
+    deleteChatApi,
+} from "../lib/api";
+
 export function useChats() {
-    const [chats, setChats] = useState<Chat[]>(
-        () => storage.loadChats()
-    );
+    const [chats, setChats] =
+        useState<Chat[]>([]);
 
     const [activeId, setActiveId] = useState<string | null>(
         () => storage.getActiveChatId()
     );
 
     useEffect(() => {
-        storage.saveChats(chats);
-    }, [chats]);
+        async function loadChats() {
+            try {
+                const mongoChats =
+                    await getChats();
+
+                const mappedChats =
+                    mongoChats.map(
+                        (chat: any) => ({
+                            id: chat._id,
+
+                            title: chat.title,
+
+                            messages:
+                                chat.messages ?? [],
+
+                            createdAt:
+                                new Date(
+                                    chat.createdAt,
+                                ).getTime(),
+
+                            updatedAt:
+                                new Date(
+                                    chat.updatedAt,
+                                ).getTime(),
+                        }),
+                    );
+
+                setChats(
+                    mappedChats,
+                );
+            } catch (error) {
+                console.error(
+                    "Failed to load chats",
+                    error,
+                );
+            }
+        }
+
+        loadChats();
+    }, []);
 
     useEffect(() => {
         storage.setActiveChatId(activeId);
@@ -36,32 +77,60 @@ export function useChats() {
         [chats, activeId]
     );
 
-    const newChat = useCallback((): Chat => {
-        const chat: Chat = {
-            id: uuid(),
+    const newChat = useCallback(
+        async (): Promise<Chat> => {
 
-            title: "New chat",
+            const mongoChat =
+                await createChat();
 
-            messages: [],
+            const chat: Chat = {
+                id:
+                    mongoChat._id,
 
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-        };
+                title:
+                    mongoChat.title,
 
-        setChats((prev) => [chat, ...prev]);
+                messages: [],
 
-        setActiveId(chat.id);
+                createdAt:
+                    Date.now(),
 
-        return chat;
-    }, []);
+                updatedAt:
+                    Date.now(),
+            };
 
-    const ensureActive = useCallback((): Chat => {
-        if (activeChat) {
-            return activeChat;
-        }
+            setChats(
+                (prev) => [
+                    chat,
+                    ...prev,
+                ],
+            );
 
-        return newChat();
-    }, [activeChat, newChat]);
+            setActiveId(
+                chat.id,
+            );
+
+            return chat;
+        },
+        [],
+    );
+
+    const ensureActive = useCallback(
+        async (): Promise<Chat> => {
+
+            if (
+                activeChat
+            ) {
+                return activeChat;
+            }
+
+            return await newChat();
+        },
+        [
+            activeChat,
+            newChat,
+        ],
+    );
 
     const appendMessage = useCallback(
         (
@@ -127,17 +196,31 @@ export function useChats() {
     );
 
     const deleteChat = useCallback(
-        (chatId: string) => {
-            setChats((prev) =>
-                prev.filter((c) => c.id !== chatId)
+        async (
+            chatId: string,
+        ) => {
+
+            await deleteChatApi(
+                chatId,
             );
 
-            if (activeId === chatId) {
-                setActiveId(null);
+            setChats(
+                (prev) =>
+                    prev.filter(
+                        (c) =>
+                            c.id !== chatId,
+                    ),
+            );
+
+            if (
+                activeId === chatId
+            ) {
+                setActiveId(
+                    null,
+                );
             }
         },
-
-        [activeId]
+        [activeId],
     );
 
     const renameChat = useCallback(

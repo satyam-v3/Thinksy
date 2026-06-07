@@ -1,5 +1,5 @@
 import { retrieveRelevantChunks } from '../lib/vectorstore/retrieval';
-import { getChromaClient, CHROMA_COLLECTION_NAME, getOrCreateThinksyCollection } from '../lib/vectorstore/chroma';
+import { getOrCreateThinksyCollection } from '../lib/vectorstore/chroma';
 
 export interface ChatMessage {
   role:

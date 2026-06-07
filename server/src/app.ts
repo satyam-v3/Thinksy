@@ -1,8 +1,7 @@
 import path from 'node:path';
-import express, { type Application, type RequestHandler } from 'express';
+import express, { type Application, } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import compression from 'compression';
 
 import { config } from './config';
 import { registerRoutes } from './routes';

@@ -21,13 +21,14 @@ import { useTheme } from "./hooks/useTheme";
 import {
   describeError,
   streamChatQuery,
+  addMessage,
+  updateChatTitle,
 } from "./lib/api";
 
 import { storage } from "./lib/storage";
 
 import type {
   Message,
-  Source,
   UploadedDoc,
 } from "./lib/types";
 
@@ -44,6 +45,7 @@ export default function App() {
     appendMessage,
     updateMessage,
     deleteChat,
+    renameChat,
   } = useChats();
 
   const [docs, setDocs] =
@@ -86,7 +88,7 @@ export default function App() {
   const handleSend = async (
     text: string
   ) => {
-    const chat = ensureActive();
+    const chat = await ensureActive();
 
     const userMsg: Message = {
       id: uuid(),
@@ -115,6 +117,29 @@ export default function App() {
     appendMessage(
       chat.id,
       userMsg
+    );
+
+    if (
+      chat.title === "New Chat"
+    ) {
+      const newTitle =
+        text.slice(0, 60);
+
+      renameChat(
+        chat.id,
+        newTitle,
+      );
+
+      void updateChatTitle(
+        chat.id,
+        newTitle,
+      );
+    }
+
+    await addMessage(
+      chat.id,
+      "user",
+      text,
     );
 
     appendMessage(
@@ -208,6 +233,12 @@ export default function App() {
 
                 pending: false,
               },
+            );
+
+            void addMessage(
+              chat.id,
+              "assistant",
+              streamedText,
             );
           },
         },

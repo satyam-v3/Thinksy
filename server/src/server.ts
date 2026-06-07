@@ -1,3 +1,4 @@
+import { connectDB } from "./config/db";
 import { createApp } from './app';
 import { config } from './config';
 import { logger } from './utils/logger';
@@ -9,6 +10,9 @@ import { logger } from './utils/logger';
  * imported by tests without starting a network listener.
  */
 async function bootstrap(): Promise<void> {
+
+  await connectDB();
+
   const app = createApp();
 
   const server = app.listen(config.port, () => {

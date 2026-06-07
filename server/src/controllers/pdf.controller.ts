@@ -3,7 +3,6 @@ import { runPdfVectorizationJob } from '../jobs/pdfVectorization.job';
 import { pdfService } from '../services/pdf.service';
 import { ApiResponse } from '../utils/ApiResponse';
 import { ApiError } from '../utils/ApiError';
-import { chatService } from '@/services/chat.service';
 
 /**
  * PDF controller — thin HTTP layer over `pdfService`.

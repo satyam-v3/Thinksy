@@ -18,7 +18,12 @@ export const api = axios.create({
 });
 
 export interface UploadResponse {
-    [k: string]: unknown;
+    success: boolean;
+
+    data: {
+        filename: string;
+        originalName: string;
+    };
 }
 
 export interface ChatQueryResponse {
@@ -383,6 +388,81 @@ export function describeError(
     }
 
     return "Something went wrong.";
+}
+
+export async function createChat() {
+    const { data } =
+        await api.post("/chats");
+
+    return data;
+}
+
+export async function getChats() {
+    const { data } =
+        await api.get("/chats");
+
+    return data;
+}
+
+export async function getChat(
+    id: string,
+) {
+    const { data } =
+        await api.get(
+            `/chats/${id}`,
+        );
+
+    return data;
+}
+
+export async function deleteChat(
+    id: string,
+) {
+    await api.delete(
+        `/chats/${id}`,
+    );
+}
+
+export async function addMessage(
+    chatId: string,
+    role:
+        | "user"
+        | "assistant",
+    content: string,
+) {
+    const { data } =
+        await api.post(
+            `/chats/${chatId}/messages`,
+            {
+                role,
+                content,
+            },
+        );
+
+    return data;
+}
+
+export async function updateChatTitle(
+    chatId: string,
+    title: string,
+) {
+    const { data } =
+        await api.patch(
+            `/chats/${chatId}/title`,
+            {
+                title,
+            },
+        );
+
+    return data;
+}
+
+export async function deleteChatApi(
+    id: string,
+) {
+    await api.delete(
+        `/chats/${id}`,
+    );
 }
 
 export { BASE_URL };

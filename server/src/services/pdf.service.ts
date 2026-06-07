@@ -10,7 +10,6 @@ import type {
   PdfUploadResult,
   UploadedPdfMeta,
   ChunkOptions,
-  EmbedOptions,
   VectorizationResult,
 } from '../types/pdf.types';
 
@@ -68,8 +67,6 @@ export const pdfService = {
     originalName?: string,
 
     chunkOpts?: ChunkOptions,
-
-    embedOpts?: EmbedOptions,
   ): Promise<VectorizationResult> {
     const source = path.basename(storedPath);
 
@@ -113,28 +110,12 @@ export const pdfService = {
       },
     );
 
-    console.log('Total Chunks:', chunks.length);
-
-    if (chunks.length > 0) {
-      console.log('First Chunk Preview:');
-      console.log(
-        chunks[0].text.slice(0, 200),
-      );
-    }
-
     // ───────────────────────────────────────────
     // 4. Generate embeddings
     // ───────────────────────────────────────────
 
     // Embed only first chunk during development
     const embeddedChunks = await embedChunks(chunks);
-
-    if (embeddedChunks.length > 0) {
-      console.log(
-        'Embedding Dimension:',
-        embeddedChunks[0].embedding.length,
-      );
-    }
 
     // ───────────────────────────────────────────
     // Final result

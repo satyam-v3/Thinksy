@@ -360,7 +360,7 @@ export function ChatArea({
                     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6">
                         {messages.map((m) => (
                             <MessageBubble
-                                key={m.id}
+                                key={`${m.createdAt}-${m.role}`}
                                 message={m}
                             />
                         ))}

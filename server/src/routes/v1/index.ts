@@ -5,6 +5,7 @@ import { pdfRouter } from './pdf.routes';
 import { chatRouter, debugRouter } from './chat.routes';
 import { flashcardRouter } from "./flashcard.routes";
 import { quizRouter } from './quiz.routes';
+import { chatsRouter } from "./chats.routes";
 
 /**
  * v1 route registry.
@@ -24,3 +25,4 @@ v1Router.use('/chat', chatRouter);
 v1Router.use('/debug', debugRouter);
 v1Router.use('/flashcards', flashcardRouter);
 v1Router.use('/quiz', quizRouter);
+v1Router.use("/chats", chatsRouter);
