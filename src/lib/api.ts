@@ -17,12 +17,32 @@ export const api = axios.create({
     timeout: 120_000,
 });
 
+// ─────────────────────────────────────────────
+// AUTHENTICATION INTERCEPTOR
+// Automatically attaches the JWT to every Axios request
+// ─────────────────────────────────────────────
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem("thinksy_token");
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
 export interface UploadResponse {
     success: boolean;
 
     data: {
         filename: string;
         originalName: string;
+        storedFilename?: string;
+        url?: string;
+        size?: number;
     };
 }
 
@@ -84,7 +104,7 @@ export async function uploadPdf(
         new FormData();
 
     form.append(
-        "pdf",
+        "pdf", // Make sure this matches the field name expected by Multer
         file,
     );
 
@@ -197,6 +217,9 @@ export async function streamChatQuery(
         ) => void;
     },
 ): Promise<void> {
+    // Grab the token manually since fetch doesn't use the Axios interceptor
+    const token = localStorage.getItem("thinksy_token");
+
     const response =
         await fetch(
             `${BASE_URL}/chat/stream`,
@@ -204,8 +227,8 @@ export async function streamChatQuery(
                 method: "POST",
 
                 headers: {
-                    "Content-Type":
-                        "application/json",
+                    "Content-Type": "application/json",
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
                 },
 
                 body: JSON.stringify({
@@ -390,6 +413,10 @@ export function describeError(
     return "Something went wrong.";
 }
 
+// ─────────────────────────────────────────────
+// CHAT PERSISTENCE API
+// ─────────────────────────────────────────────
+
 export async function createChat() {
     const { data } =
         await api.post("/chats");
@@ -464,5 +491,22 @@ export async function deleteChatApi(
         `/chats/${id}`,
     );
 }
+
+// ─────────────────────────────────────────────
+// AUTHENTICATION API
+// ─────────────────────────────────────────────
+
+export const authApi = {
+    login: async (credentials: { email: string; password?: string }) => {
+        // NOTE: Adjust the /auth/login path if your backend uses a different route name
+        const { data } = await api.post('/auth/login', credentials);
+        return data;
+    },
+    register: async (credentials: { email: string; name?: string; password?: string }) => {
+        // NOTE: Adjust the /auth/register path if your backend uses a different route name
+        const { data } = await api.post('/auth/register', credentials);
+        return data;
+    }
+};
 
 export { BASE_URL };

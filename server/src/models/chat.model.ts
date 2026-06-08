@@ -15,6 +15,8 @@ export interface ChatMessage {
 
 export interface ChatDocument
     extends Document {
+    userId: mongoose.Types.ObjectId; // Ties the chat to a specific user
+
     title: string;
 
     messages: ChatMessage[];
@@ -59,6 +61,12 @@ const MessageSchema =
 const ChatSchema =
     new Schema<ChatDocument>(
         {
+            userId: {
+                type: Schema.Types.ObjectId,
+                ref: "User",
+                required: true,
+            },
+
             title: {
                 type: String,
 
@@ -82,4 +90,4 @@ const ChatSchema =
     );
 
 export const ChatModel =
-    mongoose.models.Chat || mongoose.model<ChatDocument>("Chat", ChatSchema,);
+    mongoose.models.Chat || mongoose.model<ChatDocument>("Chat", ChatSchema);

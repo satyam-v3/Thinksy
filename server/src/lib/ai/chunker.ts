@@ -206,6 +206,9 @@ export function chunkText(
                     ),
 
                 createdAt,
+
+                // Added userId to ensure vector isolation during retrieval
+                userId: options.userId,
             };
 
             chunks.push({

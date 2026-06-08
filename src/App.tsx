@@ -11,12 +11,12 @@ import {
 } from "sonner";
 
 import { ChatArea } from "./components/ChatArea";
-
 import { Sidebar } from "./components/Sidebar";
+import { Login } from "./components/Login"; // 👈 Import the Login component
 
 import { useChats } from "./hooks/useChats";
-
 import { useTheme } from "./hooks/useTheme";
+import { useAuth } from "./context/AuthContext"; // 👈 Import your Auth Context
 
 import {
   describeError,
@@ -32,7 +32,10 @@ import type {
   UploadedDoc,
 } from "./lib/types";
 
-export default function App() {
+// ─────────────────────────────────────────────
+// 1. YOUR ORIGINAL APP LOGIC (Now called ChatApp)
+// ─────────────────────────────────────────────
+function ChatApp() {
   const { theme } = useTheme();
 
   const {
@@ -92,11 +95,8 @@ export default function App() {
 
     const userMsg: Message = {
       id: uuid(),
-
       role: "user",
-
       content: text,
-
       createdAt: Date.now(),
     };
 
@@ -104,13 +104,9 @@ export default function App() {
 
     const assistantMsg: Message = {
       id: assistantId,
-
       role: "assistant",
-
       content: "",
-
       createdAt: Date.now(),
-
       pending: true,
     };
 
@@ -197,9 +193,7 @@ export default function App() {
       await streamChatQuery(
         {
           query: text,
-
           history,
-
           activeDocs,
         },
 
@@ -253,9 +247,7 @@ export default function App() {
         assistantId,
         {
           pending: false,
-
           error: msg,
-
           content: "",
         },
       );
@@ -355,4 +347,28 @@ export default function App() {
       />
     </div>
   );
+}
+
+// ─────────────────────────────────────────────
+// 2. THE NEW AUTHENTICATION WRAPPER
+// ─────────────────────────────────────────────
+export default function App() {
+  const { user, isLoading } = useAuth();
+
+  // Show a blank screen or loading spinner while checking local storage
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-bg text-fg">
+        <div className="text-lg opacity-50">Loading Thinksy...</div>
+      </div>
+    );
+  }
+
+  // If there is no authenticated user, block access and render the Login screen
+  if (!user) {
+    return <Login />;
+  }
+
+  // If they are logged in, render the actual application!
+  return <ChatApp />;
 }

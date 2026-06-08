@@ -1,27 +1,21 @@
-import fs from 'node:fs';
 import path from 'node:path';
-import crypto from 'node:crypto';
-
 import multer, { type FileFilterCallback } from 'multer';
 import type { Request } from 'express';
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
 import { config } from '../config';
 import { ApiError } from '../utils/ApiError';
 
 /**
- * Multer upload middleware for PDF files.
- *
- * - Stores files on disk under `config.uploadDir`.
- * - Filename: `<unix-ms>-<8 hex>-<sanitized-original>.pdf` to avoid collisions.
- * - Rejects anything that is not `application/pdf` (also re-checks extension).
- * - Caps file size at `config.maxUploadBytes`.
- *
- * Errors raised here propagate through Express; the centralized error
- * middleware translates `MulterError` instances into `ApiError` responses.
+ * Configure Cloudinary
+ * Make sure these variables exist in your .env file!
  */
-
-// Ensure upload directory exists at startup so multer doesn't fail on first request.
-fs.mkdirSync(config.uploadDir, { recursive: true });
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const sanitize = (name: string): string =>
   path
@@ -29,14 +23,22 @@ const sanitize = (name: string): string =>
     .replace(/[^a-zA-Z0-9._-]+/g, '_')
     .slice(0, 100) || 'file';
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, config.uploadDir),
-  filename: (_req, file, cb) => {
-    const safeBase = sanitize(file.originalname).replace(/\.pdf$/i, '');
-    const stamp = Date.now();
-    const rand = crypto.randomBytes(4).toString('hex');
-    cb(null, `${stamp}-${rand}-${safeBase}.pdf`);
-  },
+/**
+ * Multer storage engine for Cloudinary.
+ * Using resource_type: 'raw' is required for non-image files like PDFs.
+ */
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'thinksy_pdfs',
+    resource_type: 'raw',
+    // format: 'pdf',
+    public_id: (_req: Request, file: Express.Multer.File) => {
+      const safeBase = sanitize(file.originalname).replace(/\.pdf$/i, '');
+      const stamp = Date.now();
+      return `${stamp}-${safeBase}`;
+    },
+  } as any,
 });
 
 const fileFilter = (
@@ -61,5 +63,3 @@ export const pdfUpload = multer({
     files: 1,
   },
 });
-
-console.log(config.maxUploadBytes);

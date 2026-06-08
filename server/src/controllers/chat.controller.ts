@@ -1,9 +1,10 @@
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import { z } from 'zod';
 
 import { chatService } from '../services/chat.service';
 import { ApiResponse } from '../utils/ApiResponse';
 import { ApiError } from '../utils/ApiError';
+import type { AuthRequest } from '../middleware/auth';
 
 const chatQuerySchema =
   z.object({
@@ -44,20 +45,31 @@ const chatQuerySchema =
   });
 
 export const chatController = {
-  query: async (req: Request, res: Response): Promise<void> => {
+  query: async (req: AuthRequest, res: Response): Promise<void> => {
     const parsed = chatQuerySchema.safeParse(req.body);
     if (!parsed.success) {
       throw ApiError.badRequest('Invalid chat query payload', parsed.error.flatten());
     }
 
-    const result = await chatService.queryKnowledgeBase(parsed.data);
+    const userId = req.user?.id;
+    if (!userId) {
+      throw ApiError.badRequest('User context is missing. Authentication required.');
+    }
+
+    // Merge userId into the service payload for vector isolation
+    const result = await chatService.queryKnowledgeBase({
+      ...parsed.data,
+      userId,
+    });
+
     res.status(200).json({
       answer: result.answer,
       sources: result.sources,
     });
   },
+
   stream: async (
-    req: Request,
+    req: AuthRequest,
     res: Response,
   ): Promise<void> => {
     const parsed =
@@ -70,6 +82,11 @@ export const chatController = {
         'Invalid chat query payload',
         parsed.error.flatten(),
       );
+    }
+
+    const userId = req.user?.id;
+    if (!userId) {
+      throw ApiError.badRequest('User context is missing. Authentication required.');
     }
 
     res.setHeader(
@@ -87,9 +104,10 @@ export const chatController = {
       'keep-alive',
     );
 
+    // Merge userId into the service payload for vector isolation
     const result =
       await chatService.streamKnowledgeBase(
-        parsed.data,
+        { ...parsed.data, userId },
         (token) => {
           res.write(
             `data: ${JSON.stringify({
@@ -110,8 +128,15 @@ export const chatController = {
 
     res.end();
   },
-  debugVectors: async (_req: Request, res: Response): Promise<void> => {
-    const result = await chatService.debugVectors();
+
+  debugVectors: async (req: AuthRequest, res: Response): Promise<void> => {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw ApiError.badRequest('User context is missing. Authentication required.');
+    }
+
+    // Pass userId so you only debug vectors for the authenticated user
+    const result = await chatService.debugVectors(userId);
 
     res.status(200).json(ApiResponse.success(result));
   },

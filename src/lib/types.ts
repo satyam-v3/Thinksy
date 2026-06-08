@@ -65,7 +65,9 @@ export interface UploadedDoc {
 
     filename: string; // display name
 
-    storedFilename: string; // actual server file
+    storedFilename?: string; // actual server file
+
+    url?: string;
 
     uploadedAt: number;
 

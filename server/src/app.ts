@@ -8,6 +8,7 @@ import { registerRoutes } from './routes';
 import { requestLogger } from './middleware/requestLogger';
 import { notFoundHandler } from './middleware/notFound';
 import { errorHandler } from './middleware/errorHandler';
+import { authRouter } from './routes/v1/auth.routes';
 
 /**
  * Express application factory.
@@ -38,6 +39,8 @@ export function createApp(): Application {
       ),
     ),
   );
+
+  app.use('/api/v1/auth', authRouter);
 
   // --- Versioned API routes ---
   registerRoutes(app);

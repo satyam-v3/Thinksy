@@ -67,6 +67,11 @@ export interface ChunkMetadata {
    * ISO timestamp
    */
   createdAt: string;
+
+  /**
+   * The ID of the user who owns this chunk
+   */
+  userId?: string;
 }
 
 export interface TextChunk {
@@ -110,6 +115,11 @@ export interface ChunkOptions {
   source?: string;
 
   originalName?: string;
+
+  /**
+   * The ID of the user uploading the document
+   */
+  userId?: string;
 }
 
 export interface EmbedOptions {

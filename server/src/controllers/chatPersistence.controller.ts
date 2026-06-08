@@ -1,130 +1,106 @@
-import type {
-    Request,
-    Response,
-} from "express";
-
+import type { Response } from "express";
 import { ApiError } from "../utils/ApiError";
-
-import {
-    chatPersistenceService,
-} from "../services/chatPersistence.service";
+import { chatPersistenceService } from "../services/chatPersistence.service";
+import type { AuthRequest } from "../middleware/auth";
 
 export const chatPersistenceController = {
 
     createChat: async (
-        _req: Request,
+        req: AuthRequest,
         res: Response,
     ) => {
+        const userId = req.user?.id;
+        if (!userId) throw ApiError.badRequest("Authentication required.");
 
-        const chat =
-            await chatPersistenceService.createChat();
-
+        const chat = await chatPersistenceService.createChat(userId);
         res.status(201).json(chat);
     },
 
     getChats: async (
-        _req: Request,
+        req: AuthRequest,
         res: Response,
     ) => {
+        const userId = req.user?.id;
+        if (!userId) throw ApiError.badRequest("Authentication required.");
 
-        const chats =
-            await chatPersistenceService.getChats();
-
+        const chats = await chatPersistenceService.getChats(userId);
         res.json(chats);
     },
 
     getChatById: async (
-        req: Request,
+        req: AuthRequest,
         res: Response,
     ) => {
+        const userId = req.user?.id;
+        if (!userId) throw ApiError.badRequest("Authentication required.");
 
-        const chat =
-            await chatPersistenceService.getChatById(
-                req.params.id,
-            );
+        const chat = await chatPersistenceService.getChatById(userId, req.params.id);
 
         if (!chat) {
-            throw ApiError.notFound(
-                "Chat not found",
-            );
+            throw ApiError.notFound("Chat not found");
         }
-
         res.json(chat);
     },
 
     deleteChat: async (
-        req: Request,
+        req: AuthRequest,
         res: Response,
     ) => {
+        const userId = req.user?.id;
+        if (!userId) throw ApiError.badRequest("Authentication required.");
 
-        await chatPersistenceService.deleteChat(
-            req.params.id,
-        );
-
+        await chatPersistenceService.deleteChat(userId, req.params.id);
         res.status(204).send();
     },
 
     addMessage: async (
-        req: Request,
+        req: AuthRequest,
         res: Response,
     ) => {
+        const userId = req.user?.id;
+        if (!userId) throw ApiError.badRequest("Authentication required.");
 
-        const {
+        const { role, content } = req.body;
+
+        if (!role || !content) {
+            throw ApiError.badRequest("role and content are required");
+        }
+
+        const chat = await chatPersistenceService.addMessage(
+            userId,
+            req.params.id,
             role,
             content,
-        } = req.body;
-
-        if (
-            !role ||
-            !content
-        ) {
-            throw ApiError.badRequest(
-                "role and content are required",
-            );
-        }
-
-        const chat =
-            await chatPersistenceService.addMessage(
-                req.params.id,
-                role,
-                content,
-            );
+        );
 
         if (!chat) {
-            throw ApiError.notFound(
-                "Chat not found",
-            );
+            throw ApiError.notFound("Chat not found");
         }
-
         res.json(chat);
     },
 
     updateTitle: async (
-        req: Request,
+        req: AuthRequest,
         res: Response,
     ) => {
+        const userId = req.user?.id;
+        if (!userId) throw ApiError.badRequest("Authentication required.");
 
-        const { title } =
-            req.body;
+        const { title } = req.body;
 
         if (!title) {
-            throw ApiError.badRequest(
-                "title is required",
-            );
+            throw ApiError.badRequest("title is required");
         }
 
-        const chat =
-            await chatPersistenceService.updateTitle(
-                req.params.id,
-                title,
-            );
+        const chat = await chatPersistenceService.updateTitle(
+            userId,
+            req.params.id,
+            title,
+        );
 
         if (!chat) {
-            throw ApiError.notFound(
-                "Chat not found",
-            );
+            throw ApiError.notFound("Chat not found");
         }
-
         res.json(chat);
     },
 };

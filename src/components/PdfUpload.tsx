@@ -88,7 +88,9 @@ export function PdfUpload({
                     res.data.originalName,
 
                 storedFilename:
-                    res.data.filename,
+                    res.data.storedFilename,
+
+                url: res.data.url,
 
                 size: file.size,
 

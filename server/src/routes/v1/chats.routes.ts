@@ -8,23 +8,28 @@ import {
     asyncHandler,
 } from "../../middleware/asyncHandler";
 
+import {
+    requireAuth
+} from "../../middleware/auth"; // Import the auth middleware
+
 export const chatsRouter =
     Router();
 
-chatsRouter.post("/", asyncHandler(
+// Inject requireAuth before the controller on every single route
+chatsRouter.post("/", requireAuth, asyncHandler(
     chatPersistenceController.createChat,));
 
-chatsRouter.get("/", asyncHandler(
+chatsRouter.get("/", requireAuth, asyncHandler(
     chatPersistenceController.getChats,));
 
-chatsRouter.get("/:id", asyncHandler(
+chatsRouter.get("/:id", requireAuth, asyncHandler(
     chatPersistenceController.getChatById,));
 
-chatsRouter.delete("/:id", asyncHandler(
+chatsRouter.delete("/:id", requireAuth, asyncHandler(
     chatPersistenceController.deleteChat,));
 
-chatsRouter.post("/:id/messages", asyncHandler(
+chatsRouter.post("/:id/messages", requireAuth, asyncHandler(
     chatPersistenceController.addMessage,));
 
-chatsRouter.patch("/:id/title", asyncHandler(
+chatsRouter.patch("/:id/title", requireAuth, asyncHandler(
     chatPersistenceController.updateTitle,));

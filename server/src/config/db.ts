@@ -13,10 +13,6 @@ export async function connectDB(): Promise<void> {
 
         await mongoose.connect(uri);
 
-        console.log(
-            "Connected to MongoDB",
-        );
-
     } catch (error) {
         console.error(
             "MongoDB connection failed",
